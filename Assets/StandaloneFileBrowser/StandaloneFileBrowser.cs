@@ -1,6 +1,6 @@
 using System;
 
-namespace SFB {
+namespace StandaloneFileBrowser {
     public struct ExtensionFilter {
         public string Name;
         public string[] Extensions;
@@ -12,13 +12,13 @@ namespace SFB {
     }
 
     public class StandaloneFileBrowser {
-        private static IStandaloneFileBrowser _platformWrapper = null;
+        private static readonly IStandaloneFileBrowser PlatformWrapper = null;
 
         static StandaloneFileBrowser() {
 #if UNITY_STANDALONE_OSX
             _platformWrapper = new StandaloneFileBrowserMac();
 #elif UNITY_STANDALONE_WIN
-            _platformWrapper = new StandaloneFileBrowserWindows();
+            PlatformWrapper = new StandaloneFileBrowserWindows();
 #elif UNITY_STANDALONE_LINUX
             _platformWrapper = new StandaloneFileBrowserLinux();
 #elif UNITY_EDITOR
@@ -48,7 +48,7 @@ namespace SFB {
         /// <param name="multiselect">Allow multiple file selection</param>
         /// <returns>Returns array of chosen paths. Zero length array when cancelled</returns>
         public static string[] OpenFilePanel(string title, string directory, ExtensionFilter[] extensions, bool multiselect) {
-            return _platformWrapper.OpenFilePanel(title, directory, extensions, multiselect);
+            return PlatformWrapper.OpenFilePanel(title, directory, extensions, multiselect);
         }
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace SFB {
         /// <param name="multiselect">Allow multiple file selection</param>
         /// <param name="cb">Callback")</param>
         public static void OpenFilePanelAsync(string title, string directory, ExtensionFilter[] extensions, bool multiselect, Action<string[]> cb) {
-            _platformWrapper.OpenFilePanelAsync(title, directory, extensions, multiselect, cb);
+            PlatformWrapper.OpenFilePanelAsync(title, directory, extensions, multiselect, cb);
         }
 
         /// <summary>
@@ -85,7 +85,7 @@ namespace SFB {
         /// <param name="multiselect"></param>
         /// <returns>Returns array of chosen paths. Zero length array when cancelled</returns>
         public static string[] OpenFolderPanel(string title, string directory, bool multiselect) {
-            return _platformWrapper.OpenFolderPanel(title, directory, multiselect);
+            return PlatformWrapper.OpenFolderPanel(title, directory, multiselect);
         }
 
         /// <summary>
@@ -97,7 +97,7 @@ namespace SFB {
         /// <param name="multiselect"></param>
         /// <param name="cb">Callback")</param>
         public static void OpenFolderPanelAsync(string title, string directory, bool multiselect, Action<string[]> cb) {
-            _platformWrapper.OpenFolderPanelAsync(title, directory, multiselect, cb);
+            PlatformWrapper.OpenFolderPanelAsync(title, directory, multiselect, cb);
         }
 
         /// <summary>
@@ -122,7 +122,7 @@ namespace SFB {
         /// <param name="extensions">List of extension filters. Filter Example: new ExtensionFilter("Image Files", "jpg", "png")</param>
         /// <returns>Returns chosen path. Empty string when cancelled</returns>
         public static string SaveFilePanel(string title, string directory, string defaultName, ExtensionFilter[] extensions) {
-            return _platformWrapper.SaveFilePanel(title, directory, defaultName, extensions);
+            return PlatformWrapper.SaveFilePanel(title, directory, defaultName, extensions);
         }
 
         /// <summary>
@@ -147,7 +147,7 @@ namespace SFB {
         /// <param name="extensions">List of extension filters. Filter Example: new ExtensionFilter("Image Files", "jpg", "png")</param>
         /// <param name="cb">Callback")</param>
         public static void SaveFilePanelAsync(string title, string directory, string defaultName, ExtensionFilter[] extensions, Action<string> cb) {
-            _platformWrapper.SaveFilePanelAsync(title, directory, defaultName, extensions, cb);
+            PlatformWrapper.SaveFilePanelAsync(title, directory, defaultName, extensions, cb);
         }
     }
 }

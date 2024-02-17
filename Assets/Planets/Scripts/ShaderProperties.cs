@@ -1,13 +1,14 @@
-﻿
-public class ShaderProperties {
-    public const string Key_Pixels = "_Pixels";
-    public const string Key_Light_origin = "_Light_origin";
-    public const string Key_Seed = "_Seed";
-    public const string Key_Rotation = "_Rotation";
-    public const string Key_time = "time";
-    public const string Key_Cloud_cover = "_Cloud_cover";
-
-    public const string Key_GradientTex = "_GradientTex";
-    public const string Key_TextureKeyword1 = "_ColorScheme";
-    public const string Key_TextureKeyword2 = "_Dark_ColorScheme";
+﻿namespace Planets.Scripts
+{
+	public class ShaderProperties
+	{
+		public const string KeyPixels = "_Pixels";
+		public const string KeyLightOrigin = "_Light_origin";
+		public const string KeySeed = "_Seed";
+		public const string KeyRotation = "_Rotation";
+		public const string KeyTime = "time";
+		public const string KeyCloudCover = "_Cloud_cover";
+		public const string KeyTextureKeyword1 = "_ColorScheme";
+		public const string KeyTextureKeyword2 = "_Dark_ColorScheme";
+	}
 }

@@ -1,53 +1,65 @@
-﻿using System;
-using UnityEngine;
-using UnityEngine.UI;
-[ExecuteInEditMode]
-public class GradientTextureGenerate : MonoBehaviour {
+﻿using UnityEngine;
+using UnityEngine.Serialization;
 
-    [SerializeField] private Gradient gradient;
-    [SerializeField] private Material targetMaterial;
+namespace Planets.Scripts
+{
+	[ExecuteInEditMode]
+	public class GradientTextureGenerate : MonoBehaviour
+	{
+		[FormerlySerializedAs("gradient")] [SerializeField]
+		private Gradient _gradient;
 
-    [SerializeField] private string Shader_key = "";
-    private GradientColorKey[] _colorKeys;
-    private void Awake()
-    {
-      //  targetMaterial = GetComponent<Image>().material;    
-        //Material material = new Material(Shader.Find("Unlit/DryTerran"));
-        targetMaterial.SetTexture(Shader_key, CreateTexture());
-        //GetComponent<Renderer>().material = material;
-    }
+		[FormerlySerializedAs("targetMaterial")] [SerializeField]
+		private Material _targetMaterial;
 
-    public void SetColors(GradientColorKey[] colorkey, GradientAlphaKey[] alphakey,string key = "")
-    {
-        if (string.IsNullOrEmpty(key))
-        {
-            key = Shader_key;
-        }
-        gradient = new Gradient();
-        gradient.SetKeys(colorkey,alphakey);
-        targetMaterial.SetTexture(key, CreateTexture());
-        _colorKeys = new GradientColorKey[colorkey.Length];
-        _colorKeys = colorkey;
+		[FormerlySerializedAs("Shader_key")] [SerializeField]
+		private string _shader_key = "";
 
-    }
+		private GradientColorKey[] _colorKeys;
 
-    public GradientColorKey[] GetColorKeys()
-    {
-        return _colorKeys;
-    }
-    private Texture2D CreateTexture()
-    {
-        Texture2D texture = new Texture2D(128, 1);
-        for (int h = 0; h < texture.height; h++)
-        {
-            for (int w = 0; w < texture.width; w++)
-            {
-                texture.SetPixel(w, h, gradient.Evaluate((float)w / texture.width));
-            }
-        }
+		private void Awake()
+		{
+			//  targetMaterial = GetComponent<Image>().material;    
+			//Material material = new Material(Shader.Find("Unlit/DryTerran"));
+			_targetMaterial.SetTexture(_shader_key, CreateTexture());
+			//GetComponent<Renderer>().material = material;
+		}
 
-        texture.Apply();
-        texture.wrapMode = TextureWrapMode.Clamp;
-        return texture;
-    }
+		public void SetColors(
+			GradientColorKey[] colorKey,
+			GradientAlphaKey[] alphaKey,
+			string key = ""
+		)
+		{
+			if (string.IsNullOrEmpty(key))
+				key = _shader_key;
+			_gradient = new Gradient();
+			_gradient.SetKeys(colorKey, alphaKey);
+			_targetMaterial.SetTexture(key, CreateTexture());
+			_colorKeys = new GradientColorKey[colorKey.Length];
+			_colorKeys = colorKey;
+		}
+
+		public GradientColorKey[] GetColorKeys()
+		{
+			return _colorKeys;
+		}
+
+		private Texture2D CreateTexture()
+		{
+			var texture = new Texture2D(128, 1);
+			for (var h = 0; h < texture.height; h++)
+			{
+				for (var w = 0; w < texture.width; w++)
+					texture.SetPixel(
+						w,
+						h,
+						_gradient.Evaluate((float)w / texture.width));
+			}
+
+			texture.Apply();
+			texture.wrapMode = TextureWrapMode.Clamp;
+			return texture;
+		}
+	}
 }

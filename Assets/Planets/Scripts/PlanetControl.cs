@@ -1,224 +1,245 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ColorGradientPicker.Scripts;
 using UnityEngine;
-using UnityEngine.Animations;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
-using Random = System.Random;
 
+namespace Planets.Scripts
+{
+	public class PlanetControl : MonoBehaviour
+	{
+		[FormerlySerializedAs("sliderPixel")] [SerializeField]
+		private Slider _sliderPixel;
 
-public class PlanetControl : MonoBehaviour {
-    
-    [SerializeField] private Slider sliderPixel;
-    [SerializeField] private Text textPixel;
-    [SerializeField] private Slider sliderRotation;
-    [SerializeField] private InputField inputSeed;
+		[FormerlySerializedAs("textPixel")] [SerializeField]
+		private Text _textPixel;
 
-    [SerializeField] private GameObject[] planets;
-    [SerializeField] private Dropdown dd_planets;
+		[FormerlySerializedAs("sliderRotation")] [SerializeField]
+		private Slider _sliderRotation;
 
-    [SerializeField] private ExportControl _exportControl;
-    [SerializeField] private GameObject exportPanel;
-    [SerializeField] private MaterialSave _materialSave;
-    [SerializeField] private GameObject pref_colorButton;
-    [SerializeField] private RectTransform colorButtonHolder;
-    
-    private float time = 0f;
-    private float pixels = 100;
-    private int seed = 0;
-    private bool override_time = false;
-    private List<Color> colors = new List<Color>();
-    private List<GameObject> colorBtns = new List<GameObject>();
-    private int selectedColorButtonID = 0;
-    private GameObject selectedColorButton;
-    private void Start()
-    {
-        OnChangeSeedRandom();
-        GetColors();
-        MakeColorButtons();
-    }
+		[FormerlySerializedAs("inputSeed")] [SerializeField]
+		private InputField _inputSeed;
 
-    private int selected_planet = 0;
+		[FormerlySerializedAs("planets")] [SerializeField]
+		private GameObject[] _planets;
 
-    public void OnClickChooseColor()
-    {
-        selectedColorButton = EventSystem.current.currentSelectedGameObject;
-        selectedColorButtonID = EventSystem.current.currentSelectedGameObject.GetComponent<ColorChooserButton>().ButtonID;
-        ColorPicker.Create(colors[selectedColorButtonID], "Choose color", onColorChanged, onColorSelected, false);
-    }
+		[FormerlySerializedAs("dd_planets")] [SerializeField]
+		private Dropdown _dropDownPlanets;
 
-    private void onColorChanged(Color currentColor)
-    {
-        colors[selectedColorButtonID] = currentColor;
-        SetColor();
-    }
+		[SerializeField] private ExportControl _exportControl;
 
-    private void onColorSelected(Color finishedColor)
-    {
-        colors[selectedColorButtonID] = finishedColor;
-        SetColor();
-    }
-    private void MakeColorButtons()
-    {
-        for (int i = 0; i < colors.Count; i++)
-        {
-            var btn = GameObject.Instantiate(pref_colorButton, colorButtonHolder);
-            colorBtns.Add(btn);
-            btn.GetComponent<Image>().color = colors[i];
-            btn.GetComponent<ColorChooserButton>().ButtonID = i;
-            btn.GetComponent<Button>().onClick.AddListener(() => OnClickChooseColor());
-        }
-    }
-    private void GetColors()
-    {
-        foreach (var btn in colorBtns)
-        {
-            DestroyImmediate(btn);
-        }
-        
-        colors.Clear();
-        colorBtns.Clear();
-        colors = planets[selected_planet].GetComponent<IPlanet>().GetColors().ToList();
-    }
+		[FormerlySerializedAs("exportPanel")] [SerializeField]
+		private GameObject _exportPanel;
 
-    private void SetColor()
-    {
-        //Debug.Log(selected_planet + ":"+planets[selected_planet]);
-        selectedColorButton.GetComponent<Image>().color = colors[selectedColorButtonID];
-        planets[selected_planet].GetComponent<IPlanet>().SetColors(colors.ToArray());
-    }
-    public void OnSelectPlanet()
-    {
-        selected_planet = dd_planets.value;
-        IPlanet _planet = null;
-        for (int i = 0; i < planets.Length; i++)
-        {
-            if (i == selected_planet) {
-                planets[i] .SetActive(true);
-            } else {
-                planets[i].SetActive(false);
-            }
-        }
-        
-        GetColors();
-        MakeColorButtons();
-    }
-    public void OnSliderPixelChanged()
-    {
-        pixels = sliderPixel.value;
-        planets[selected_planet].GetComponent<IPlanet>().SetPixel(sliderPixel.value);
-        textPixel.text = pixels.ToString("F0") + "x" + pixels.ToString("F0");
+		[SerializeField] private MaterialSave _materialSave;
 
-    }
-    public void OnSliderRotationChanged()
-    {
-        planets[selected_planet].GetComponent<IPlanet>().SetRotate(sliderRotation.value);
+		[FormerlySerializedAs("pref_colorButton")] [SerializeField]
+		private GameObject _colorButtonPrfab;
 
-    }
-    public void OnLightPositionChanged(Vector2 pos)
-    {
-        planets[selected_planet].GetComponent<IPlanet>().SetLight(pos);
-    }
+		[FormerlySerializedAs("colorButtonHolder")] [SerializeField]
+		private RectTransform _colorButtonHolder;
 
-    private void UpdateTime(float time)
-    {
-        planets[selected_planet].GetComponent<IPlanet>().UpdateTime(time);
-        
-    }
+		private float _time;
+		private float _pixels = 100;
+		private int _seed;
+		private bool _overrideTime;
+		private List<Color> _colors = new();
+		private readonly List<GameObject> _colorButtons = new();
+		private int _selectedColorButtonID;
+		private GameObject _selectedColorButton;
 
-    public void OnChangeSeedInput()
-    {
-        if (int.TryParse(inputSeed.text, out seed))
-        {
-            planets[selected_planet].GetComponent<IPlanet>().SetSeed(seed);
-        }
-    }
-    public void OnChangeSeedRandom()
-    {
-        seedRandom();
-        planets[selected_planet].GetComponent<IPlanet>().SetSeed(seed);
-    }
-    private void seedRandom()
-    {
-        UnityEngine.Random.InitState( System.DateTime.Now.Millisecond );
-        seed = UnityEngine.Random.Range(0, int.MaxValue);
-        inputSeed.text = seed.ToString();
+		private int _selectedPlanet;
 
-    }
-    private void Update()
-    {
-        if (isOnGui()) return;
-        
-        if (Input.GetMouseButton(0))
-        {
-            var pos = Camera.main.ScreenToViewportPoint(Input.mousePosition);
-            OnLightPositionChanged(pos);
-        }
+		private void Start()
+		{
+			OnChangeSeedRandom();
+			GetColors();
+			MakeColorButtons();
+		}
 
-        time += Time.deltaTime;
-        if (!override_time) {
-            UpdateTime(time);
-        }
+		public void OnClickChooseColor()
+		{
+			_selectedColorButton = EventSystem.current.currentSelectedGameObject;
+			_selectedColorButtonID =
+				EventSystem.current.currentSelectedGameObject.GetComponent<ColorChooserButton>().ButtonID;
+			ColorPicker.Create(
+				_colors[_selectedColorButtonID],
+				"Choose color",
+				OnColorChanged,
+				OnColorSelected);
+		}
 
-    }
+		private void OnColorChanged(Color currentColor)
+		{
+			_colors[_selectedColorButtonID] = currentColor;
+			SetColor();
+		}
 
-    private bool isOnGui()
-    {
-        var eventData = new PointerEventData(EventSystem.current);
-        eventData.position = Input.mousePosition;
-        var result = new List<RaycastResult>();
-        EventSystem.current.RaycastAll(eventData, result);
+		private void OnColorSelected(Color finishedColor)
+		{
+			_colors[_selectedColorButtonID] = finishedColor;
+			SetColor();
+		}
 
-        if (result.Count(x => x.gameObject.GetComponent<Selectable>()) > 0) {
-            return true;
-        }
+		private void MakeColorButtons()
+		{
+			for (var i = 0; i < _colors.Count; i++)
+			{
+				var btn = Instantiate(_colorButtonPrfab, _colorButtonHolder);
+				_colorButtons.Add(btn);
+				btn.GetComponent<Image>().color = _colors[i];
+				btn.GetComponent<ColorChooserButton>().ButtonID = i;
+				btn.GetComponent<Button>().onClick.AddListener(() => OnClickChooseColor());
+			}
+		}
 
-        return false;
-    }
+		private void GetColors()
+		{
+			foreach (var btn in _colorButtons)
+				DestroyImmediate(btn);
 
-    public void OnExportPng()
-    {
-        var mats = new List<Material>();
-        var images = planets[selected_planet].GetComponentsInChildren<Image>();
-        foreach (var img in images)
-        {
-            mats.Add(img.material);
-        }
-        _materialSave.SaveImage(mats, seed.ToString());
-        mats.Clear();
-    }
+			_colors.Clear();
+			_colorButtons.Clear();
+			_colors = _planets[_selectedPlanet].GetComponent<IPlanet>().GetColors().ToList();
+		}
 
-    public void OnExportSheets()
-    {
-        override_time = true;
-        var customeSize = 100;
-        if (dd_planets.value == 9)
-        {
-            customeSize = 200;
-        }
-        var mats = new List<Material>();
-        var images = planets[selected_planet].GetComponentsInChildren<Image>();
-        foreach (var img in images)
-        {
-            mats.Add(img.material);
-            Debug.Log(img.gameObject.name);
-        }
+		private void SetColor()
+		{
+			//Debug.Log(selected_planet + ":"+planets[selected_planet]);
+			_selectedColorButton.GetComponent<Image>().color = _colors[_selectedColorButtonID];
+			_planets[_selectedPlanet].GetComponent<IPlanet>().SetColors(_colors.ToArray());
+		}
 
-        IPlanet iplanet = planets[selected_planet].GetComponent<IPlanet>();
-        _materialSave.SaveSheets(mats, seed.ToString(), _exportControl.GetWidth(), _exportControl.GetHeight(),iplanet, customeSize);
-        mats.Clear();
-        override_time = false;
-    }
-    
-    public void ShowExport()
-    {
-        exportPanel.SetActive(true);
-    }
+		public void OnSelectPlanet()
+		{
+			_selectedPlanet = _dropDownPlanets.value;
+			for (var i = 0; i < _planets.Length; i++)
+				if (i == _selectedPlanet)
+					_planets[i].SetActive(true);
+				else
+					_planets[i].SetActive(false);
 
-    public void HideExport()
-    {
-        exportPanel.SetActive(false);
-    }
-    
+			GetColors();
+			MakeColorButtons();
+		}
+
+		public void OnSliderPixelChanged()
+		{
+			_pixels = _sliderPixel.value;
+			_planets[_selectedPlanet].GetComponent<IPlanet>().SetPixel(_sliderPixel.value);
+			_textPixel.text = _pixels.ToString("F0") + "x" + _pixels.ToString("F0");
+		}
+
+		public void OnSliderRotationChanged()
+		{
+			_planets[_selectedPlanet].GetComponent<IPlanet>().SetRotate(_sliderRotation.value);
+		}
+
+		public void OnLightPositionChanged(Vector2 pos)
+		{
+			_planets[_selectedPlanet].GetComponent<IPlanet>().SetLight(pos);
+		}
+
+		private void UpdateTime(float time)
+		{
+			_planets[_selectedPlanet].GetComponent<IPlanet>().UpdateTime(time);
+		}
+
+		public void OnChangeSeedInput()
+		{
+			if (int.TryParse(_inputSeed.text, out _seed))
+				_planets[_selectedPlanet].GetComponent<IPlanet>().SetSeed(_seed);
+		}
+
+		public void OnChangeSeedRandom()
+		{
+			SeedRandom();
+			_planets[_selectedPlanet].GetComponent<IPlanet>().SetSeed(_seed);
+		}
+
+		private void SeedRandom()
+		{
+			UnityEngine.Random.InitState(DateTime.Now.Millisecond);
+			_seed = UnityEngine.Random.Range(0, int.MaxValue);
+			_inputSeed.text = _seed.ToString();
+		}
+
+		private void Update()
+		{
+			if (isOnGui())
+				return;
+
+			if (Input.GetMouseButton(0))
+			{
+				var pos = Camera.main.ScreenToViewportPoint(Input.mousePosition);
+				OnLightPositionChanged(pos);
+			}
+
+			_time += Time.deltaTime;
+			if (!_overrideTime)
+				UpdateTime(_time);
+		}
+
+		private bool isOnGui()
+		{
+			var eventData = new PointerEventData(EventSystem.current);
+			eventData.position = Input.mousePosition;
+			var result = new List<RaycastResult>();
+			EventSystem.current.RaycastAll(eventData, result);
+
+			if (result.Count(x => x.gameObject.GetComponent<Selectable>()) > 0)
+				return true;
+
+			return false;
+		}
+
+		public void OnExportPng()
+		{
+			var mats = new List<Material>();
+			var images = _planets[_selectedPlanet].GetComponentsInChildren<Image>();
+			foreach (var img in images)
+				mats.Add(img.material);
+			_materialSave.SaveImage(mats, _seed.ToString());
+			mats.Clear();
+		}
+
+		public void OnExportSheets()
+		{
+			_overrideTime = true;
+			var customeSize = 100;
+			if (_dropDownPlanets.value == 9)
+				customeSize = 200;
+			var mats = new List<Material>();
+			var images = _planets[_selectedPlanet].GetComponentsInChildren<Image>();
+			foreach (var img in images)
+			{
+				mats.Add(img.material);
+				Debug.Log(img.gameObject.name);
+			}
+
+			var iplanet = _planets[_selectedPlanet].GetComponent<IPlanet>();
+			_materialSave.SaveSheets(
+				mats,
+				_seed.ToString(),
+				_exportControl.GetWidth(),
+				_exportControl.GetHeight(),
+				iplanet,
+				customeSize);
+			mats.Clear();
+			_overrideTime = false;
+		}
+
+		public void ShowExport()
+		{
+			_exportPanel.SetActive(true);
+		}
+
+		public void HideExport()
+		{
+			_exportPanel.SetActive(false);
+		}
+	}
 }

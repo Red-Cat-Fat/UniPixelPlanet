@@ -1,45 +1,48 @@
 ﻿using UnityEngine;
 
-public class DragWindowCntrl : MonoBehaviour
+namespace ColorGradientPicker.Scripts
 {
-    private RectTransform window;
-    //delta drag
-    private Vector2 delta;
+    public class DragWindowCntrl : MonoBehaviour
+    {
+        private RectTransform _window;
+        //delta drag
+        private Vector2 _delta;
 
-    private void Awake()
-    {
-        window = (RectTransform)transform;
-    }
+        private void Awake()
+        {
+            _window = (RectTransform)transform;
+        }
 
-    public void BeginDrag()
-    {
-        delta = Input.mousePosition - window.position;
-    }
-    public void Drag()
-    {
-        Vector2 newPos = (Vector2)Input.mousePosition - delta;
-        Vector2 Transform = new Vector2(window.rect.width * transform.root.lossyScale.x, window.rect.height * transform.root.lossyScale.y);
-        Vector2 OffsetMin, OffsetMax;
-        OffsetMin.x = newPos.x - window.pivot.x * Transform.x;
-        OffsetMin.y = newPos.y - window.pivot.y * Transform.y;
-        OffsetMax.x = newPos.x + (1 - window.pivot.x) * Transform.x;
-        OffsetMax.y = newPos.y + (1 - window.pivot.y) * Transform.y;
-        if (OffsetMin.x < 0)
+        public void BeginDrag()
         {
-            newPos.x = window.pivot.x * Transform.x;
+            _delta = Input.mousePosition - _window.position;
         }
-        else if (OffsetMax.x > Screen.width)
+        public void Drag()
         {
-            newPos.x = Screen.width - (1 - window.pivot.x) * Transform.x;
+            Vector2 newPos = (Vector2)Input.mousePosition - _delta;
+            Vector2 transform = new Vector2(_window.rect.width * ((Component)this).transform.root.lossyScale.x, _window.rect.height * ((Component)this).transform.root.lossyScale.y);
+            Vector2 offsetMin, offsetMax;
+            offsetMin.x = newPos.x - _window.pivot.x * transform.x;
+            offsetMin.y = newPos.y - _window.pivot.y * transform.y;
+            offsetMax.x = newPos.x + (1 - _window.pivot.x) * transform.x;
+            offsetMax.y = newPos.y + (1 - _window.pivot.y) * transform.y;
+            if (offsetMin.x < 0)
+            {
+                newPos.x = _window.pivot.x * transform.x;
+            }
+            else if (offsetMax.x > Screen.width)
+            {
+                newPos.x = Screen.width - (1 - _window.pivot.x) * transform.x;
+            }
+            if (offsetMin.y < 0)
+            {
+                newPos.y = _window.pivot.y * transform.y;
+            }
+            else if (offsetMax.y > Screen.height)
+            {
+                newPos.y = Screen.height - (1 - _window.pivot.y) * transform.y;
+            }
+            _window.position = newPos;
         }
-        if (OffsetMin.y < 0)
-        {
-            newPos.y = window.pivot.y * Transform.y;
-        }
-        else if (OffsetMax.y > Screen.height)
-        {
-            newPos.y = Screen.height - (1 - window.pivot.y) * Transform.y;
-        }
-        window.position = newPos;
     }
 }

@@ -1,12 +1,15 @@
 ﻿using UnityEngine;
 
-public class ColorChooserButton : MonoBehaviour {
+namespace Planets.Scripts
+{
+	public class ColorChooserButton : MonoBehaviour
+	{
+		private int _buttonID;
 
-    private int buttonID = 0;
-
-    public int ButtonID
-    {
-        get { return buttonID; }
-        set { buttonID = value; }
-    }
+		public int ButtonID
+		{
+			get => _buttonID;
+			set => _buttonID = value;
+		}
+	}
 }

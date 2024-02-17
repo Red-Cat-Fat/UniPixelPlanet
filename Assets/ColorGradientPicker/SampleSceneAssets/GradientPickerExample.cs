@@ -1,32 +1,34 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using ColorGradientPicker.Scripts;
 using UnityEngine;
 
-public class GradientPickerExample : MonoBehaviour
+namespace ColorGradientPicker.SampleSceneAssets
 {
-    private Renderer r;
-    private Gradient myGradient;
-    void Start()
+    public class GradientPickerExample : MonoBehaviour
     {
-        r = GetComponent<Renderer>();
-        r.sharedMaterial = r.material;
-        myGradient = new Gradient();
-    }
-    private void Update()
-    {
-        r.sharedMaterial.color = myGradient.Evaluate(0.5f + Mathf.Sin(Time.time * 2f) * 0.5f);
-    }
-    public void ChooseGradientButtonClick()
-    {
-        GradientPicker.Create(myGradient, "Choose the sphere's color!", SetGradient, GradientFinished);
-    }
-    private void SetGradient(Gradient currentGradient)
-    {
-        myGradient = currentGradient;
-    }
+        private Renderer _r;
+        private Gradient _myGradient;
+        void Start()
+        {
+            _r = GetComponent<Renderer>();
+            _r.sharedMaterial = _r.material;
+            _myGradient = new Gradient();
+        }
+        private void Update()
+        {
+            _r.sharedMaterial.color = _myGradient.Evaluate(0.5f + Mathf.Sin(Time.time * 2f) * 0.5f);
+        }
+        public void ChooseGradientButtonClick()
+        {
+            GradientPicker.Create(_myGradient, "Choose the sphere's color!", SetGradient, GradientFinished);
+        }
+        private void SetGradient(Gradient currentGradient)
+        {
+            _myGradient = currentGradient;
+        }
 
-    private void GradientFinished(Gradient finishedGradient)
-    {
-        Debug.Log("You chose a Gradient with " + finishedGradient.colorKeys.Length + " Color keys");
+        private void GradientFinished(Gradient finishedGradient)
+        {
+            Debug.Log("You chose a Gradient with " + finishedGradient.colorKeys.Length + " Color keys");
+        }
     }
 }

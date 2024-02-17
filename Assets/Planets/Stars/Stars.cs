@@ -1,166 +1,199 @@
-using System.Collections;
-using System.Collections.Generic;
+using Planets.Scripts;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Stars : MonoBehaviour, IPlanet {
-    [SerializeField] private GameObject StarBackground;
-    [SerializeField] private GameObject Star;
-    [SerializeField] private GameObject StarFlares;
-    private Material m_Starbackground;
-    private Material m_Star;
-    private Material m_StarFlares;
-    [SerializeField] private GradientTextureGenerate _gradientStar;
-    [SerializeField] private GradientTextureGenerate _gradientStarFlare;
-    
-    private string gradient_vars = "_GradientTex";
-    
+namespace Planets.Stars
+{
+	public class Stars : MonoBehaviour, IPlanet
+	{
+		[SerializeField] private GameObject StarBackground;
+		[SerializeField] private GameObject Star;
+		[SerializeField] private GameObject StarFlares;
+		private Material _mStarbackground;
+		private Material _mStar;
+		private Material _mStarFlares;
+		[SerializeField] private GradientTextureGenerate _gradientStar;
+		[SerializeField] private GradientTextureGenerate _gradientStarFlare;
 
-    private GradientColorKey[] colorKey1 = new GradientColorKey[4];
-    private GradientColorKey[] colorKey2 = new GradientColorKey[2];
-    private GradientAlphaKey[] alphaKey1 = new GradientAlphaKey[4];
-    private GradientAlphaKey[] alphaKey2 = new GradientAlphaKey[2];
-    
-    private string[] color_vars1 = new string[]{"_Color1"};
-    private string[] init_colors1 = new string[] {"#ffffe4"};
-    
-    private string[] _colors1 = new[] {"#f5ffe8", "#77d6c1", "#1c92a7", "#033e5e"};
-    private string[] _colors2 = new[] {"#77d6c1", "#ffffe4"};
-    private float[] _color_times1 = new float[4] { 0f, 0.33f, 0.66f, 1.0f };
-    private float[] _color_times2 = new float[2] { 0f, 1.0f };
-    private void Awake()
-    {
-        m_Starbackground = StarBackground.GetComponent<Image>().material;
-        m_Star = Star.GetComponent<Image>().material;
-        m_StarFlares = StarFlares.GetComponent<Image>().material;
-        SetInitialColors();
-    }
-    public void SetPixel(float amount)
-    {
-        m_Starbackground.SetFloat(ShaderProperties.Key_Pixels, amount * 2);
-        m_Star.SetFloat(ShaderProperties.Key_Pixels, amount);
-        m_StarFlares.SetFloat(ShaderProperties.Key_Pixels, amount * 2);
-    }
+		private readonly string _gradientVars = "_GradientTex";
 
-    public void SetLight(Vector2 pos)
-    {
-        return;
-    }
+		private readonly GradientColorKey[] _colorKey1 = new GradientColorKey[4];
+		private readonly GradientColorKey[] _colorKey2 = new GradientColorKey[2];
+		private readonly GradientAlphaKey[] _alphaKey1 = new GradientAlphaKey[4];
+		private readonly GradientAlphaKey[] _alphaKey2 = new GradientAlphaKey[2];
 
-    public void SetSeed(float seed)
-    {
-        var converted_seed = seed % 1000f / 100f;
-        m_Starbackground.SetFloat(ShaderProperties.Key_Seed, converted_seed);
-        m_Star.SetFloat(ShaderProperties.Key_Seed, converted_seed);
-        m_StarFlares.SetFloat(ShaderProperties.Key_Seed, converted_seed);
-       // setGragientColor(seed);
-    }
+		private readonly string[] _colorVars1 = { "_Color1" };
+		private readonly string[] _initColors1 = { "#ffffe4" };
 
-    public void SetRotate(float r)
-    {
-        m_Starbackground.SetFloat(ShaderProperties.Key_Rotation, r);
-        m_Star.SetFloat(ShaderProperties.Key_Rotation, r);
-        m_StarFlares.SetFloat(ShaderProperties.Key_Rotation, r);
-    }
+		private readonly string[] _colors1 =
+		{
+			"#f5ffe8",
+			"#77d6c1",
+			"#1c92a7",
+			"#033e5e"
+		};
 
-    public void UpdateTime(float time)
-    {
-        m_Starbackground.SetFloat(ShaderProperties.Key_time, time );
-        m_Star.SetFloat(ShaderProperties.Key_time, time  * 0.1f);
-        m_StarFlares.SetFloat(ShaderProperties.Key_time, time  );
-    }
+		private readonly string[] _colors2 =
+		{
+			"#77d6c1",
+			"#ffffe4"
+		};
 
-    public void SetCustomTime(float time)
-    {
-        m_Starbackground.SetFloat(ShaderProperties.Key_time, time);
-        m_Star.SetFloat(ShaderProperties.Key_time, time);
-        m_StarFlares.SetFloat(ShaderProperties.Key_time, time);
-    }
-    public void SetInitialColors()
-    {
-        for (int i = 0; i < color_vars1.Length; i++)
-        {
-            m_Starbackground.SetColor(color_vars1[i], ColorUtil.FromRGB(init_colors1[i]));
-        }
-        setGragientColor();
-    }
+		private readonly float[] _colorTimes1 = new float[4]
+		{
+			0f,
+			0.33f,
+			0.66f,
+			1.0f
+		};
 
-    private void setGragientColor()
-    {
-        for (int i = 0; i < colorKey1.Length; i++)
-        {
-            colorKey1[i].color = default(Color);
-            ColorUtility.TryParseHtmlString(_colors1[i], out colorKey1[i].color);
+		private readonly float[] _colorTimes2 = new float[2]
+		{
+			0f,
+			1.0f
+		};
 
-            colorKey1[i].time = _color_times1[i];
-            alphaKey1[i].alpha = 1.0f;
-            alphaKey1[i].time = _color_times1[i];
-        }
-        
-        
-        for (int i = 0; i < colorKey2.Length; i++)
-        {
-            colorKey2[i].color = default(Color);
-            ColorUtility.TryParseHtmlString(_colors2[i], out colorKey2[i].color);
+		private void Awake()
+		{
+			_mStarbackground = StarBackground.GetComponent<Image>().material;
+			_mStar = Star.GetComponent<Image>().material;
+			_mStarFlares = StarFlares.GetComponent<Image>().material;
+			SetInitialColors();
+		}
 
-            colorKey2[i].time = _color_times2[i];
-            alphaKey2[i].alpha = 1.0f;
-            colorKey2[i].time = _color_times2[i];
-        }
-        _gradientStar.SetColors(colorKey1,alphaKey1,gradient_vars);
-        _gradientStarFlare.SetColors(colorKey2,alphaKey2,gradient_vars);
-    }
-    public Color[] GetColors()
-    {
-        var colors = new Color[7];
-        for (int i = 0; i < color_vars1.Length; i++)
-        {
-            colors[i] = m_Starbackground.GetColor(color_vars1[i]);
-        }
-        var size = color_vars1.Length;
-        
-        var gradColors = _gradientStar.GetColorKeys();
-        for (int i = 0; i < gradColors.Length; i++)
-        {
-            colors[i + size] = gradColors[i].color;
-        }
-        size += gradColors.Length;
-        
-        var gradColors2 = _gradientStarFlare.GetColorKeys();
-        for (int i = 0; i < gradColors2.Length; i++)
-        {
-            colors[i + size] = gradColors2[i].color;
-        }
+		public void SetPixel(float amount)
+		{
+			_mStarbackground.SetFloat(ShaderProperties.KeyPixels, amount * 2);
+			_mStar.SetFloat(ShaderProperties.KeyPixels, amount);
+			_mStarFlares.SetFloat(ShaderProperties.KeyPixels, amount * 2);
+		}
 
-        return colors;
-    }
+		public void SetLight(Vector2 pos)
+		{
+			return;
+		}
 
-    public void SetColors(Color[] _colors)
-    {
-        for (int i = 0; i < color_vars1.Length; i++)
-        {
-            m_Starbackground.SetColor(color_vars1[i], _colors[i]);
-        }
-        var size = color_vars1.Length;
-        
-        for (int i = 0; i < colorKey1.Length; i++)
-        {
-            colorKey1[i].color = _colors[i + size];
-            colorKey1[i].time = _color_times1[i];
-            alphaKey1[i].alpha = 1.0f;
-            alphaKey1[i].time = _color_times1[i];
-        }
-        _gradientStar.SetColors(colorKey1,alphaKey1,gradient_vars);
-        size += colorKey1.Length;
-        
-        for (int i = 0; i < colorKey2.Length; i++)
-        {
-            colorKey2[i].color = _colors[ i + size ];
-            colorKey2[i].time = _color_times2[i];
-            alphaKey2[i].alpha = 1.0f;
-            alphaKey2[i].time = _color_times2[i];
-        }
-        _gradientStarFlare.SetColors(colorKey2,alphaKey2,gradient_vars);
+		public void SetSeed(float seed)
+		{
+			var convertedSeed = seed % 1000f / 100f;
+			_mStarbackground.SetFloat(ShaderProperties.KeySeed, convertedSeed);
+			_mStar.SetFloat(ShaderProperties.KeySeed, convertedSeed);
+			_mStarFlares.SetFloat(ShaderProperties.KeySeed, convertedSeed);
+			// setGragientColor(seed);
+		}
 
-    }
+		public void SetRotate(float r)
+		{
+			_mStarbackground.SetFloat(ShaderProperties.KeyRotation, r);
+			_mStar.SetFloat(ShaderProperties.KeyRotation, r);
+			_mStarFlares.SetFloat(ShaderProperties.KeyRotation, r);
+		}
+
+		public void UpdateTime(float time)
+		{
+			_mStarbackground.SetFloat(ShaderProperties.KeyTime, time);
+			_mStar.SetFloat(ShaderProperties.KeyTime, time * 0.1f);
+			_mStarFlares.SetFloat(ShaderProperties.KeyTime, time);
+		}
+
+		public void SetCustomTime(float time)
+		{
+			_mStarbackground.SetFloat(ShaderProperties.KeyTime, time);
+			_mStar.SetFloat(ShaderProperties.KeyTime, time);
+			_mStarFlares.SetFloat(ShaderProperties.KeyTime, time);
+		}
+
+		public void SetInitialColors()
+		{
+			for (var i = 0; i < _colorVars1.Length; i++)
+				_mStarbackground.SetColor(_colorVars1[i], ColorUtil.FromRGB(_initColors1[i]));
+			SetGragientColor();
+		}
+
+		private void SetGragientColor()
+		{
+			for (var i = 0; i < _colorKey1.Length; i++)
+			{
+				_colorKey1[i].color = default;
+				ColorUtility.TryParseHtmlString(_colors1[i], out _colorKey1[i].color);
+
+				_colorKey1[i].time = _colorTimes1[i];
+				_alphaKey1[i].alpha = 1.0f;
+				_alphaKey1[i].time = _colorTimes1[i];
+			}
+
+
+			for (var i = 0; i < _colorKey2.Length; i++)
+			{
+				_colorKey2[i].color = default;
+				ColorUtility.TryParseHtmlString(_colors2[i], out _colorKey2[i].color);
+
+				_colorKey2[i].time = _colorTimes2[i];
+				_alphaKey2[i].alpha = 1.0f;
+				_colorKey2[i].time = _colorTimes2[i];
+			}
+
+			_gradientStar.SetColors(
+				_colorKey1,
+				_alphaKey1,
+				_gradientVars);
+			_gradientStarFlare.SetColors(
+				_colorKey2,
+				_alphaKey2,
+				_gradientVars);
+		}
+
+		public Color[] GetColors()
+		{
+			var colors = new Color[7];
+			for (var i = 0; i < _colorVars1.Length; i++)
+				colors[i] = _mStarbackground.GetColor(_colorVars1[i]);
+			var size = _colorVars1.Length;
+
+			var gradColors = _gradientStar.GetColorKeys();
+			for (var i = 0; i < gradColors.Length; i++)
+				colors[i + size] = gradColors[i].color;
+			size += gradColors.Length;
+
+			var gradColors2 = _gradientStarFlare.GetColorKeys();
+			for (var i = 0; i < gradColors2.Length; i++)
+				colors[i + size] = gradColors2[i].color;
+
+			return colors;
+		}
+
+		public void SetColors(Color[] colors)
+		{
+			for (var i = 0; i < _colorVars1.Length; i++)
+				_mStarbackground.SetColor(_colorVars1[i], colors[i]);
+			var size = _colorVars1.Length;
+
+			for (var i = 0; i < _colorKey1.Length; i++)
+			{
+				_colorKey1[i].color = colors[i + size];
+				_colorKey1[i].time = _colorTimes1[i];
+				_alphaKey1[i].alpha = 1.0f;
+				_alphaKey1[i].time = _colorTimes1[i];
+			}
+
+			_gradientStar.SetColors(
+				_colorKey1,
+				_alphaKey1,
+				_gradientVars);
+			size += _colorKey1.Length;
+
+			for (var i = 0; i < _colorKey2.Length; i++)
+			{
+				_colorKey2[i].color = colors[i + size];
+				_colorKey2[i].time = _colorTimes2[i];
+				_alphaKey2[i].alpha = 1.0f;
+				_alphaKey2[i].time = _colorTimes2[i];
+			}
+
+			_gradientStarFlare.SetColors(
+				_colorKey2,
+				_alphaKey2,
+				_gradientVars);
+		}
+	}
 }

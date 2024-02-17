@@ -1,98 +1,99 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
-public class ExportControl : MonoBehaviour {
-    [SerializeField] private Button btnUpWidth;
-    [SerializeField] private Button btnDownWidth;
-    [SerializeField] private Button btnUpHeight;
-    [SerializeField] private Button btnDownHeight;
+namespace Planets.Scripts
+{
+	public class ExportControl : MonoBehaviour
+	{
+		[FormerlySerializedAs("inputWidth")] [SerializeField]
+		private InputField _inputWidth;
 
-    [SerializeField] private InputField inputWidth;
-    [SerializeField] private InputField inputHeight;
-    [SerializeField] private Text textFrame;
-    [SerializeField] private Text textResolution;
+		[FormerlySerializedAs("inputHeight")] [SerializeField]
+		private InputField _inputHeight;
 
-    private int width = 5;
-    private int height = 2;
-    private int frames = 0;
-    private const int max_frame = 100;
-    private void Start()
-    {
-        updateFrame();
-        
-    }
+		[FormerlySerializedAs("textFrame")] [SerializeField]
+		private Text _textFrame;
 
-    public int GetWidth()
-    {
-        return width;
-    }
+		[FormerlySerializedAs("textResolution")] [SerializeField]
+		private Text _textResolution;
 
-    public int GetHeight()
-    {
-        return height;
-    }
-    public void OnUpdateFrames()
-    {
-        var w = 0;
-        var h = 0;
-        int.TryParse(inputWidth.text, out w);
-        int.TryParse(inputHeight.text, out h);
-        if (w < 1 || w > max_frame) {
-            inputWidth.text = width.ToString();
-            return;
-        }
-        
-        if (h < 1 || h > max_frame) {
-            inputHeight.text = height.ToString();
-            return;
-        }
+		private int _width = 5;
+		private int _height = 2;
+		private int _frames;
+		private const int MaxFrame = 100;
 
-        width = w;
-        height = h;
-        updateFrame();
-    }
+		private void Start()
+		{
+			UpdateFrame();
+		}
 
-    private void updateFrame()
-    {
-        frames = width * height;
-        
-        inputWidth.text = width.ToString();
-        textFrame.text = frames.ToString();
-        textResolution.text = (width * 100).ToString() + "x" + (height * 100).ToString();
-    }
-    public void OnWidthUp()
-    {
-        if (width < max_frame)
-        {
-            width++;
-        }
-        updateFrame();
+		public int GetWidth()
+		{
+			return _width;
+		}
 
-    }
-    public void OnWidthDown()
-    {
-        if (width > 1)
-        {
-            width--;
-        }
-        updateFrame();
-    }
-    public void OnHeightUp()
-    {
-        if (height < max_frame)
-        {
-            height++;
-        }
-        updateFrame();
+		public int GetHeight()
+		{
+			return _height;
+		}
 
-    }
-    public void OnHeightDown()
-    {
-        if (height > 1)
-        {
-            height--;
-        }
-        updateFrame();
-    }
+		public void OnUpdateFrames()
+		{
+			int.TryParse(_inputWidth.text, out var w);
+			int.TryParse(_inputHeight.text, out var h);
+			if (w < 1 || w > MaxFrame)
+			{
+				_inputWidth.text = _width.ToString();
+				return;
+			}
+
+			if (h < 1 || h > MaxFrame)
+			{
+				_inputHeight.text = _height.ToString();
+				return;
+			}
+
+			_width = w;
+			_height = h;
+			UpdateFrame();
+		}
+
+		private void UpdateFrame()
+		{
+			_frames = _width * _height;
+
+			_inputWidth.text = _width.ToString();
+			_textFrame.text = _frames.ToString();
+			_textResolution.text = (_width * 100).ToString() + "x" + (_height * 100).ToString();
+		}
+
+		public void OnWidthUp()
+		{
+			if (_width < MaxFrame)
+				_width++;
+			UpdateFrame();
+		}
+
+		public void OnWidthDown()
+		{
+			if (_width > 1)
+				_width--;
+			UpdateFrame();
+		}
+
+		public void OnHeightUp()
+		{
+			if (_height < MaxFrame)
+				_height++;
+			UpdateFrame();
+		}
+
+		public void OnHeightDown()
+		{
+			if (_height > 1)
+				_height--;
+			UpdateFrame();
+		}
+	}
 }
